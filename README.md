@@ -13,6 +13,10 @@ Gram Sahayak AI is a full-stack prototype for helping rural citizens discover go
 
 The assistant deliberately uses grounded retrieval instead of free-form generation. This keeps answers tied to known scheme records and avoids dependency on a third-party AI API during a demo. The current prototype still requires the client and server to be reachable on the same machine or local network; true offline caching and SMS/IVR fallback are roadmap items.
 
+## Getting Started
+
+Prerequisite: Node.js 24 or newer. Node 24 provides the built-in `node:sqlite` module used by the server, so no native SQLite build dependency is required.
+
 ## Tech Stack
 
 - React + Vite frontend
@@ -20,9 +24,9 @@ The assistant deliberately uses grounded retrieval instead of free-form generati
 - Node's built-in `node:sqlite` module
 - SQLite database with idempotent sample data seeding
 
-## Quick Start
+### 1. Start the backend
 
-### 1. Start the server
+Open the first terminal at the project root:
 
 ```bash
 cd server
@@ -30,11 +34,11 @@ npm install
 npm start
 ```
 
-The server listens on `http://localhost:5000` by default. It creates `server/gramsahayak.db` and seeds villages and schemes when their tables are empty.
+The server listens on `http://localhost:5000` by default. It creates `server/gramsahayak.db` and seeds villages and schemes when their tables are empty. Node may print an experimental warning for `node:sqlite`; this is expected for Node 24 and does not indicate a startup failure.
 
-### 2. Start the client
+Leave this terminal running, then open a second terminal for the client.
 
-In a separate terminal:
+### 2. Start the frontend
 
 ```bash
 cd client
@@ -42,7 +46,7 @@ npm install
 npm run dev
 ```
 
-Open the Vite URL, usually `http://localhost:5173`. Set `VITE_API_URL` if the backend is hosted at another address.
+Open the Vite URL, usually `http://localhost:5173`. Set `VITE_API_URL` if the backend is hosted at another address. The app should show a connected backend, five villages, eight schemes, the assistant, grievance form, alerts, and the Hindi/English toggle.
 
 ### 3. Build the client
 
@@ -50,6 +54,23 @@ Open the Vite URL, usually `http://localhost:5173`. Set `VITE_API_URL` if the ba
 cd client
 npm run build
 ```
+
+## Troubleshooting
+
+- **Port 5000 is already in use:** Stop the older server terminal or run the server with another `PORT` value, then point `VITE_API_URL` at that port.
+- **The client says disconnected:** Confirm the backend terminal is still running and check `http://localhost:5000/api/health`.
+- **The scheme list is empty:** Restart the backend. Its idempotent seed block populates schemes when the table is empty.
+- **Install errors:** Confirm Node.js 24 or newer is selected, then run `npm install` again from the affected `server` or `client` directory. Avoid deleting lockfiles unless dependency resolution is genuinely broken.
+
+## Hackathon Checklist
+
+Before presenting, start both terminals and open the Vite page so judges see the ready application rather than setup commands. A reliable two-minute flow is:
+
+1. Ask the assistant: `I am a small farmer, what support can I get?`
+2. Show the grounded PM-Kisan and crop-insurance results.
+3. Switch the interface to Hindi.
+4. Submit a water-supply grievance and show its `pending` response.
+5. Explain the Jharkhand roadmap: state schemes, tribal languages, FRA guidance, CSC deployment, and SMS/IVR fallback.
 
 ## API Highlights
 
