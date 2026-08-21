@@ -1,2 +1,124 @@
-html,body,#root { height: 100%; margin: 0; }
-body { background: #f7f7f8; color:#111 }
+* { box-sizing: border-box; }
+
+:root {
+	font-family: "Segoe UI", system-ui, sans-serif;
+	color: #17302a;
+	background: #f3f7f4;
+	font-synthesis: none;
+}
+
+body { margin: 0; min-width: 320px; background: #f3f7f4; }
+button, input, select, textarea { font: inherit; }
+button { cursor: pointer; }
+
+.app-shell { min-height: 100vh; }
+
+.app-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 24px;
+	padding: 32px max(24px, calc((100vw - 1180px) / 2));
+	color: #fff;
+	background: linear-gradient(115deg, #124b39 0%, #267352 56%, #d18a3b 145%);
+}
+
+.app-header h1 { margin: 4px 0 6px; font-size: clamp(28px, 4vw, 44px); letter-spacing: 0; }
+.eyebrow { margin: 0; color: #b9dfc8; font-size: 11px; font-weight: 700; letter-spacing: 1.5px; }
+.header-subtitle { margin: 0; color: #d4ebdc; font-size: 14px; }
+.language-toggle { border: 1px solid rgba(255,255,255,.5); border-radius: 6px; padding: 10px 16px; color: #fff; background: rgba(255,255,255,.12); }
+.language-toggle:hover { background: rgba(255,255,255,.22); }
+
+.connection-status, .stats-bar, .tab-nav, .tab-content { width: min(1180px, calc(100% - 48px)); margin-inline: auto; }
+.connection-status { padding: 14px 0 4px; font-size: 13px; }
+.connection-status span { font-weight: 700; }
+
+.stats-bar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; padding: 16px 0 24px; }
+.stat-card { padding: 18px 20px; border: 1px solid #dce9df; border-radius: 8px; background: #fff; box-shadow: 0 4px 14px rgba(28, 70, 49, .06); }
+.stat-number { display: block; color: #19704d; font-size: 30px; font-weight: 700; }
+.stat-label { display: block; margin-top: 3px; color: #65756d; font-size: 12px; }
+
+.tab-nav { display: flex; gap: 4px; border-bottom: 1px solid #cbdacf; }
+.tab { border: 0; border-bottom: 3px solid transparent; padding: 13px 18px; color: #64736c; background: transparent; font-weight: 650; }
+.tab:hover, .tab.active { color: #176b4a; background: #e9f3ec; }
+.tab.active { border-bottom-color: #d18a3b; }
+
+.tab-content { padding: 26px 0 56px; }
+.panel { margin-bottom: 20px; padding: 24px; border: 1px solid #dce9df; border-radius: 8px; background: #fff; box-shadow: 0 5px 18px rgba(28, 70, 49, .05); }
+.panel h2 { margin: 0 0 16px; color: #173e30; font-size: 21px; }
+.panel h3 { color: #173e30; }
+
+.risk-map-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 18px; }
+.risk-map-heading h2 { margin: 3px 0 0; }
+.risk-map-eyebrow { color: #c0782d; }
+.risk-map-count { padding: 7px 10px; border: 1px solid #e6d8bd; border-radius: 4px; color: #8a632c; background: #fffaf0; font-size: 11px; font-weight: 700; white-space: nowrap; }
+.risk-map-layout { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(280px, .65fr); gap: 22px; }
+.risk-map-canvas { position: relative; min-height: 420px; overflow: hidden; border: 1px solid #c7dacf; border-radius: 6px; background: #eaf4e8; }
+.risk-map-canvas::before, .risk-map-canvas::after { position: absolute; content: ''; pointer-events: none; }
+.risk-map-canvas::before { inset: 0; opacity: .42; background-image: linear-gradient(30deg, transparent 48%, #d2e4d1 49%, transparent 50%), linear-gradient(150deg, transparent 48%, #d2e4d1 49%, transparent 50%); background-size: 52px 52px; }
+.risk-map-canvas::after { inset: 12px; border: 1px solid rgba(87, 132, 97, .2); border-radius: 45% 55% 50% 40%; transform: rotate(-8deg); }
+.risk-map-canvas svg { position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%; }
+.map-river { fill: none; stroke: #9ac9d0; stroke-width: 1.8; opacity: .8; }
+.map-road { fill: none; stroke: #caa878; stroke-width: 1.1; stroke-dasharray: 2 2; opacity: .8; }
+.map-road-secondary { stroke: #d7bf98; stroke-width: .8; }
+.map-marker { cursor: pointer; outline: none; }
+.map-marker:focus .marker-dot, .map-marker:hover .marker-dot, .map-marker.selected .marker-dot { stroke: #fff; stroke-width: 1; }
+.marker-pulse { opacity: .22; animation: marker-pulse 2.2s ease-out infinite; transform-origin: center; }
+.marker-dot { stroke: rgba(255,255,255,.7); stroke-width: .7; }
+.marker-label { fill: #335545; font-size: 3.2px; font-weight: 700; paint-order: stroke; stroke: #eaf4e8; stroke-width: .9px; }
+@keyframes marker-pulse { 0%, 100% { transform: scale(.8); opacity: .3; } 70% { transform: scale(1.8); opacity: 0; } }
+.risk-legend { position: absolute; z-index: 2; right: 14px; bottom: 14px; display: flex; gap: 10px; padding: 8px 10px; border: 1px solid rgba(199, 218, 207, .9); border-radius: 4px; background: rgba(255,255,255,.9); color: #52645b; font-size: 11px; }
+.risk-legend span { display: inline-flex; align-items: center; gap: 5px; }
+.risk-legend i, .risk-village-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; }
+.risk-village-list { min-width: 0; }
+.risk-village-list h3 { margin: 4px 0 10px; font-size: 15px; }
+.risk-village { display: flex; align-items: center; width: 100%; gap: 10px; margin-bottom: 7px; padding: 11px 10px !important; border-color: #e0ebe2 !important; color: #17302a !important; background: #fbfdfb !important; text-align: left; }
+.risk-village:hover, .risk-village.selected { border-color: #99c3a6 !important; background: #eef7ef !important; }
+.risk-village-copy { display: flex; flex: 1; min-width: 0; flex-direction: column; gap: 3px; }
+.risk-village-copy strong { font-size: 13px; }
+.risk-village-copy small { overflow: hidden; color: #718078; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+.risk-village-level { font-size: 10px; font-weight: 750; text-transform: uppercase; }
+.risk-map-note, .risk-map-empty { margin: 12px 0 0; color: #65756d; font-size: 12px; }
+
+.scheme-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-top: 16px; }
+.scheme-card { padding: 18px; border: 1px solid #dce9df; border-radius: 6px; background: #fbfdfb; transition: transform .15s, box-shadow .15s; }
+.scheme-card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(28, 70, 49, .1); }
+.scheme-card h3 { margin: 0 0 8px; font-size: 17px; }
+.scheme-card strong { display: inline-block; padding: 4px 8px; border-radius: 4px; color: #176b4a; background: #e5f2e8; font-size: 10px; letter-spacing: .7px; }
+.scheme-card p { margin: 12px 0 0; color: #52645b; line-height: 1.55; }
+
+.panel button:not(.tab), .panel select, .panel input, .panel textarea { border: 1px solid #cbdacf; border-radius: 5px; }
+.panel button:not(.tab) { padding: 9px 13px; color: #176b4a; background: #f4faf5; font-weight: 650; }
+.panel button:not(.tab):hover { border-color: #19704d; background: #e5f2e8; }
+.panel button:disabled { cursor: wait; opacity: .65; }
+.panel input, .panel select, .panel textarea { padding: 10px 12px; color: #17302a; background: #fff; }
+.panel textarea { resize: vertical; }
+.assistant-panel > div:first-of-type { display: flex; gap: 8px; }
+.assistant-panel input { flex: 1; }
+.assistant-panel input:focus, .panel select:focus, .panel textarea:focus { outline: 2px solid #b9dfc8; border-color: #19704d; }
+
+.grievance-form form { max-width: 720px; }
+.grievance-form label { color: #52645b; font-size: 13px; font-weight: 650; }
+.grievance-form input, .grievance-form select, .grievance-form textarea { margin-top: 6px; }
+
+table { display: block; overflow-x: auto; width: 100%; border-collapse: collapse; }
+th { color: #52645b; background: #f5faf6; font-size: 12px; text-transform: uppercase; letter-spacing: .4px; }
+th, td { padding: 11px 12px !important; border-bottom: 1px solid #e5eee7 !important; text-align: left !important; white-space: nowrap; }
+
+@media (max-width: 720px) {
+	.app-header { align-items: flex-start; padding: 24px; }
+	.header-subtitle { max-width: 230px; line-height: 1.4; }
+	.connection-status, .stats-bar, .tab-nav, .tab-content { width: calc(100% - 32px); }
+	.stats-bar { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+	.stat-card { padding: 14px; }
+	.stat-number { font-size: 25px; }
+	.tab-nav { overflow-x: auto; }
+	.tab { flex: 0 0 auto; padding-inline: 12px; font-size: 13px; }
+	.tab-content { padding-top: 18px; }
+	.panel { padding: 17px; }
+	.assistant-panel > div:first-of-type { flex-direction: column; }
+	.risk-map-heading { flex-direction: column; }
+	.risk-map-layout { grid-template-columns: 1fr; }
+	.risk-map-canvas { min-height: 320px; }
+	.risk-legend { right: 8px; bottom: 8px; flex-wrap: wrap; max-width: 190px; }
+}
