@@ -65,7 +65,11 @@ db.exec(`
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
     category TEXT NOT NULL,
-    description TEXT
+    description TEXT,
+    eligibility TEXT,
+    documents TEXT,
+    how_to_apply TEXT,
+    official_link TEXT
   );
   CREATE TABLE IF NOT EXISTS grievances (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -86,20 +90,106 @@ for (const column of ['category TEXT DEFAULT \'other\'', 'media_path TEXT']) {
   }
 }
 
+for (const column of ['eligibility TEXT', 'documents TEXT', 'how_to_apply TEXT', 'official_link TEXT']) {
+  try {
+    db.exec(`ALTER TABLE schemes ADD COLUMN ${column}`);
+  } catch (error) {
+    if (!String(error.message).toLowerCase().includes('duplicate column')) throw error;
+  }
+}
+
 const schemeCount = db.prepare('SELECT COUNT(*) AS count FROM schemes').get();
+const schemes = [
+  {
+    name: 'PM-Kisan Samman Nidhi',
+    category: 'agriculture',
+    description: 'INR 6,000 per year in income support for small and marginal farmers, paid in three installments.',
+    eligibility: 'All landholding farmer families with cultivable land, subject to exclusion criteria such as income tax payers and government employees.',
+    documents: 'Aadhaar card, land ownership papers, bank account details, mobile number',
+    how_to_apply: 'Register at the nearest Common Service Centre (CSC) or online at pmkisan.gov.in. A local patwari or panchayat can assist with land verification.',
+    official_link: 'https://pmkisan.gov.in'
+  },
+  {
+    name: 'Ayushman Bharat (PM-JAY)',
+    category: 'health',
+    description: 'Free health insurance cover up to INR 5 lakh per family per year for secondary and tertiary care.',
+    eligibility: 'Families identified under the SECC 2011 database as economically vulnerable; check eligibility through the portal or a CSC.',
+    documents: 'Aadhaar card, ration card, mobile number',
+    how_to_apply: 'Check eligibility at pmjay.gov.in or call 14555. Visit a nearby empanelled hospital or CSC to get an Ayushman card.',
+    official_link: 'https://pmjay.gov.in'
+  },
+  {
+    name: 'MGNREGA',
+    category: 'employment',
+    description: 'Guarantees 100 days of wage employment per year to rural households.',
+    eligibility: 'Any adult member of a rural household willing to do unskilled manual work.',
+    documents: 'Aadhaar card, job card issued by the Gram Panchayat, bank account',
+    how_to_apply: 'Apply for a Job Card at the Gram Panchayat office. Once issued, request work in writing; the panchayat must provide work within 15 days.',
+    official_link: 'https://nrega.nic.in'
+  },
+  {
+    name: 'Pradhan Mantri Awas Yojana (Gramin)',
+    category: 'housing',
+    description: 'Financial assistance for construction of pucca houses for rural poor.',
+    eligibility: 'Houseless families or those living in kutcha or dilapidated houses, as identified through SECC 2011 and Awaas+ survey data.',
+    documents: 'Aadhaar card, MGNREGA job card if available, bank account, land documents',
+    how_to_apply: 'Contact the Gram Panchayat or Block Development Officer to check the beneficiary list, or apply through the Awaas+ mobile app.',
+    official_link: 'https://pmayg.nic.in'
+  },
+  {
+    name: 'Pradhan Mantri Fasal Bima Yojana',
+    category: 'agriculture',
+    description: 'Crop insurance protecting farmers against crop loss or damage.',
+    eligibility: 'All farmers growing notified crops in notified areas, including loanee and non-loanee farmers.',
+    documents: 'Aadhaar card, land records, bank account, sowing certificate',
+    how_to_apply: 'Apply through your bank if you have a crop loan, or through a CSC or insurance company portal before the seasonal enrollment deadline.',
+    official_link: 'https://pmfby.gov.in'
+  },
+  {
+    name: 'National Social Assistance Programme',
+    category: 'welfare',
+    description: 'Pension support for elderly people, widows, and people with disabilities below the poverty line.',
+    eligibility: 'BPL households; age 60+ for elderly pension, widows of any age, and persons with 80% or more disability.',
+    documents: 'Aadhaar card, age or disability proof, BPL certificate, bank account',
+    how_to_apply: 'Apply at the Gram Panchayat or Block office with the required documents; forms are also available through the Social Welfare Department.',
+    official_link: 'https://nsap.nic.in'
+  },
+  {
+    name: 'Pradhan Mantri Ujjwala Yojana',
+    category: 'welfare',
+    description: 'Free LPG connections to women from BPL households.',
+    eligibility: 'Adult women from BPL households without an existing LPG connection.',
+    documents: 'Aadhaar card, BPL ration card, bank account, passport-size photo',
+    how_to_apply: 'Visit the nearest LPG distributor with the required documents, or apply online at pmuy.gov.in.',
+    official_link: 'https://pmuy.gov.in'
+  },
+  {
+    name: 'Jal Jeevan Mission',
+    category: 'infrastructure',
+    description: 'Aims to provide functional household tap water connections to rural households.',
+    eligibility: 'All rural households without a functional tap water connection.',
+    documents: 'No individual application is typically needed because implementation is village-wise; contact the Gram Panchayat for status.',
+    how_to_apply: 'Check with the Gram Panchayat or Village Water and Sanitation Committee (VWSC) about implementation status in your village.',
+    official_link: 'https://jaljeevanmission.gov.in'
+  }
+];
+
+const updateScheme = db.prepare(`
+  UPDATE schemes
+  SET category = ?, description = ?, eligibility = ?, documents = ?, how_to_apply = ?, official_link = ?
+  WHERE name = ?
+`);
+const insertScheme = db.prepare(`
+  INSERT INTO schemes (name, category, description, eligibility, documents, how_to_apply, official_link)
+  VALUES (?, ?, ?, ?, ?, ?, ?)
+`);
+for (const scheme of schemes) {
+  const result = updateScheme.run(scheme.category, scheme.description, scheme.eligibility, scheme.documents, scheme.how_to_apply, scheme.official_link, scheme.name);
+  if (result.changes === 0) {
+    insertScheme.run(scheme.name, scheme.category, scheme.description, scheme.eligibility, scheme.documents, scheme.how_to_apply, scheme.official_link);
+  }
+}
 if (schemeCount.count === 0) {
-  const schemes = [
-    ['PM-Kisan Samman Nidhi', 'agriculture', 'INR 6,000 per year in income support for small and marginal farmers, paid in three installments.'],
-    ['Ayushman Bharat (PM-JAY)', 'health', 'Health insurance cover up to INR 5 lakh per family per year for secondary and tertiary care.'],
-    ['MGNREGA', 'employment', 'Guarantees 100 days of wage employment per year to rural households.'],
-    ['Pradhan Mantri Awas Yojana (Gramin)', 'housing', 'Financial assistance for construction of permanent houses for rural households.'],
-    ['Pradhan Mantri Fasal Bima Yojana', 'agriculture', 'Crop insurance protecting farmers against crop loss or damage.'],
-    ['National Social Assistance Programme', 'welfare', 'Pension support for elderly people, widows, and people with disabilities below the poverty line.'],
-    ['Pradhan Mantri Ujjwala Yojana', 'welfare', 'LPG connections for women from below-poverty-line households.'],
-    ['Jal Jeevan Mission', 'infrastructure', 'Aims to provide functional household tap water connections to rural households.']
-  ];
-  const insertScheme = db.prepare('INSERT INTO schemes (name, category, description) VALUES (?, ?, ?)');
-  for (const scheme of schemes) insertScheme.run(scheme[0], scheme[1], scheme[2]);
   console.log(`Seeded schemes table with ${schemes.length} sample entries.`);
 }
 
@@ -177,7 +267,7 @@ app.get('/api/assistant/query', (req, res) => {
 
   const topMatch = matches[0];
   res.json({
-    answer: `Based on your query, "${topMatch.name}" may help: ${topMatch.description}`,
+    answer: `Based on your query, "${topMatch.name}" may help: ${topMatch.description} To apply: ${topMatch.how_to_apply}`,
     matches: matches.slice(0, 3).map(({ score, ...scheme }) => scheme)
   });
 });

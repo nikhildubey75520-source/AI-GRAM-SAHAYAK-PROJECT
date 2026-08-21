@@ -111,6 +111,47 @@ function RiskMap({ villages, alerts }) {
   )
 }
 
+function SchemeCard({ scheme }) {
+  const [expanded, setExpanded] = useState(false)
+
+  return (
+    <article className="scheme-card">
+      <strong>{scheme.category}</strong>
+      <h3>{scheme.name}</h3>
+      <p>{scheme.description}</p>
+      <button
+        type="button"
+        className="details-toggle"
+        onClick={() => setExpanded(current => !current)}
+        aria-expanded={expanded}
+      >
+        {expanded ? 'Hide details ▲' : 'How to apply ▼'}
+      </button>
+      {expanded && (
+        <div className="scheme-details">
+          <div className="detail-row">
+            <strong>Eligibility</strong>
+            <p>{scheme.eligibility || 'Eligibility details are not available yet.'}</p>
+          </div>
+          <div className="detail-row">
+            <strong>Documents needed</strong>
+            <p>{scheme.documents || 'Document details are not available yet.'}</p>
+          </div>
+          <div className="detail-row">
+            <strong>How to apply</strong>
+            <p>{scheme.how_to_apply || 'Application guidance is not available yet.'}</p>
+          </div>
+          {scheme.official_link && (
+            <a href={scheme.official_link} target="_blank" rel="noopener noreferrer" className="official-link">
+              Visit official website ↗
+            </a>
+          )}
+        </div>
+      )}
+    </article>
+  )
+}
+
 export default function App() {
   const { lang, setLang, t } = useLanguage()
   const [healthStatus, setHealthStatus] = useState('loading')
@@ -283,9 +324,18 @@ export default function App() {
           <h1>{t('appTitle')}</h1>
           <p className="header-subtitle">Schemes, local support, and citizen voice in one place.</p>
         </div>
-        <button className="language-toggle" type="button" onClick={() => setLang(lang === 'en' ? 'hi' : 'en')}>
-          {lang === 'en' ? 'हिंदी' : 'English'}
-        </button>
+        <div className="language-toggle" role="group" aria-label="Choose language">
+          {[
+            ['en', 'English'],
+            ['hi', 'हिंदी'],
+            ['sat', 'ᱥᱟᱱᱛᱟᱲᱤ'],
+            ['mag', 'मगही']
+          ].map(([code, label]) => (
+            <button key={code} type="button" className={lang === code ? 'active' : ''} onClick={() => setLang(code)} aria-pressed={lang === code}>
+              {label}
+            </button>
+          ))}
+        </div>
       </header>
 
       <div className="connection-status">
@@ -362,13 +412,7 @@ export default function App() {
               ))}
             </div>
             <div className="scheme-list">
-              {visibleSchemes.map(scheme => (
-                <article className="scheme-card" key={scheme.id}>
-                  <h3 style={{ margin: '0 0 6px' }}>{scheme.name}</h3>
-                  <strong style={{ fontSize: 12, textTransform: 'uppercase' }}>{scheme.category}</strong>
-                  <p style={{ marginBottom: 0 }}>{scheme.description}</p>
-                </article>
-              ))}
+              {visibleSchemes.map(scheme => <SchemeCard key={scheme.id} scheme={scheme} />)}
             </div>
           </>
         )}
