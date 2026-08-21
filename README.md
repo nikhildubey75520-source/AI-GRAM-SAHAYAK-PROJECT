@@ -70,10 +70,11 @@ Before presenting, start both terminals and open the Vite page so judges see the
 
 1. Ask the assistant: `I am a small farmer, what support can I get?`
 2. Show the grounded PM-Kisan and crop-insurance results.
-3. Switch the interface to Hindi, then show the Santhali and Magahi draft options as part of the regional-language roadmap.
-4. Submit a water-supply grievance with a photo of a broken handpump and show the evidence preview and `pending` response.
-5. Open the risk map to show how village alert severity is surfaced spatially.
-6. Explain the Jharkhand roadmap: state schemes, tribal languages, FRA guidance, CSC deployment, and SMS/IVR fallback.
+3. Expand `How to apply` on PM-Kisan to show eligibility, documents, the application path, and the official website.
+4. Switch the interface to Hindi, then show the Santhali and Magahi draft options as part of the regional-language roadmap.
+5. Submit a water-supply grievance with a photo of a broken handpump and show the evidence preview and `pending` response.
+6. Open the risk map to show how village alert severity is surfaced spatially.
+7. Explain the Jharkhand roadmap: state schemes, tribal languages, FRA guidance, CSC deployment, and SMS/IVR fallback.
 
 ## API Highlights
 
@@ -106,10 +107,11 @@ Add `-F "media=@path/to/evidence.jpg"` to attach a JPEG, PNG, WebP, MP4, MOV, or
 1. Explain the difficulty of finding schemes and reporting village issues.
 2. Ask: `I am a small farmer, what support can I get?`
 3. Show the grounded PM-Kisan and crop-insurance results.
-4. Switch the interface to Hindi, then show the Santhali and Magahi draft options.
-5. Submit a water-supply grievance with a photo and show its evidence preview and `pending` status.
-6. Open the risk map and point out the severity markers and village watchlist.
-7. Close with the Jharkhand roadmap: state schemes, Santhali and Mundari support, FRA guidance, CSC deployment, and SMS/IVR fallback.
+4. Expand `How to apply` on PM-Kisan to show eligibility, required documents, the application path, and the official link.
+5. Switch the interface to Hindi, then show the Santhali and Magahi draft options.
+6. Submit a water-supply grievance with a photo and show its evidence preview and `pending` status.
+7. Open the risk map and point out the severity markers and village watchlist.
+8. Close with the Jharkhand roadmap: state schemes, Santhali and Mundari support, FRA guidance, CSC deployment, and SMS/IVR fallback.
 
 Santhali and Magahi support are best-effort draft translations for demonstration only. Production deployment requires review with native speakers of each language. Santhali may use the Ol Chiki script, while the current Magahi strings use Devanagari; neither set of strings should be treated as verified translations.
 
