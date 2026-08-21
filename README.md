@@ -10,7 +10,7 @@ Gram Sahayak AI is a full-stack prototype for helping rural citizens discover go
 - Accepts grievances with optional photo or video evidence and stores them in SQLite with a `pending` status.
 - Displays submitted grievances and their attached evidence.
 - Creates, filters, and updates village alerts, with a village risk map based on alert severity.
-- Switches visible interface labels between English and Hindi.
+- Switches visible interface labels between English, Hindi, draft Santhali, and draft Magahi.
 
 The assistant deliberately uses grounded retrieval instead of free-form generation. This keeps answers tied to known scheme records and avoids dependency on a third-party AI API during a demo. The current prototype still requires the client and server to be reachable on the same machine or local network; true offline caching and SMS/IVR fallback are roadmap items.
 
@@ -48,7 +48,7 @@ npm install
 npm run dev
 ```
 
-Open the Vite URL, usually `http://localhost:5173`. Set `VITE_API_URL` if the backend is hosted at another address. The app should show a connected backend, five villages, eight schemes, the assistant, grievance form with optional media evidence, village risk map, alerts, and the Hindi/English toggle.
+Open the Vite URL, usually `http://localhost:5173`. Set `VITE_API_URL` if the backend is hosted at another address. The app should show a connected backend, five villages, eight schemes, the assistant, grievance form with optional media evidence, village risk map, alerts, and the English/Hindi/Santhali/Magahi language toggle.
 
 ### 3. Build the client
 
@@ -70,7 +70,7 @@ Before presenting, start both terminals and open the Vite page so judges see the
 
 1. Ask the assistant: `I am a small farmer, what support can I get?`
 2. Show the grounded PM-Kisan and crop-insurance results.
-3. Switch the interface to Hindi.
+3. Switch the interface to Hindi, then show the Santhali and Magahi draft options as part of the regional-language roadmap.
 4. Submit a water-supply grievance with a photo of a broken handpump and show the evidence preview and `pending` response.
 5. Open the risk map to show how village alert severity is surfaced spatially.
 6. Explain the Jharkhand roadmap: state schemes, tribal languages, FRA guidance, CSC deployment, and SMS/IVR fallback.
@@ -106,10 +106,12 @@ Add `-F "media=@path/to/evidence.jpg"` to attach a JPEG, PNG, WebP, MP4, MOV, or
 1. Explain the difficulty of finding schemes and reporting village issues.
 2. Ask: `I am a small farmer, what support can I get?`
 3. Show the grounded PM-Kisan and crop-insurance results.
-4. Switch the interface to Hindi.
+4. Switch the interface to Hindi, then show the Santhali and Magahi draft options.
 5. Submit a water-supply grievance with a photo and show its evidence preview and `pending` status.
 6. Open the risk map and point out the severity markers and village watchlist.
 7. Close with the Jharkhand roadmap: state schemes, Santhali and Mundari support, FRA guidance, CSC deployment, and SMS/IVR fallback.
+
+Santhali and Magahi support are best-effort draft translations for demonstration only. Production deployment requires review with native speakers of each language. Santhali may use the Ol Chiki script, while the current Magahi strings use Devanagari; neither set of strings should be treated as verified translations.
 
 ## Roadmap
 
