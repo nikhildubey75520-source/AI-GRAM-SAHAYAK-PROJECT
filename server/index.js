@@ -2,12 +2,40 @@ const express = require('express');
 const cors = require('cors');
 const { DatabaseSync } = require('node:sqlite');
 const path = require('path');
+const fs = require('fs');
+const multer = require('multer');
 
 const app = express();
+
+const uploadDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+
+const storage = multer.diskStorage({
+  destination: (req, file, callback) => callback(null, uploadDir),
+  filename: (req, file, callback) => {
+    const unique = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+    callback(null, unique + path.extname(file.originalname).toLowerCase());
+  }
+});
+
+const upload = multer({
+  storage,
+  limits: { fileSize: 15 * 1024 * 1024 },
+  fileFilter: (req, file, callback) => {
+    const allowedExtensions = /\.(jpeg|jpg|png|webp|mp4|mov|avi)$/i;
+    const allowedMimeTypes = /^(image\/(jpeg|png|webp)|video\/(mp4|quicktime|x-msvideo))$/i;
+    if (allowedExtensions.test(file.originalname) && allowedMimeTypes.test(file.mimetype)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Only JPEG, PNG, WebP images and MP4, MOV, AVI videos are allowed'));
+    }
+  }
+});
 
 // Allow the Vite dev server origin so the React client can call the API
 app.use(cors({ origin: 'http://localhost:5173' }));
 app.use(express.json());
+app.use('/uploads', express.static(uploadDir));
 
 const DB_PATH = path.join(__dirname, 'gramsahayak.db');
 const db = new DatabaseSync(DB_PATH);
@@ -43,10 +71,20 @@ db.exec(`
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
     issue TEXT NOT NULL,
+    category TEXT DEFAULT 'other',
+    media_path TEXT,
     status TEXT DEFAULT 'pending',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   );
 `);
+
+for (const column of ['category TEXT DEFAULT \'other\'', 'media_path TEXT']) {
+  try {
+    db.exec(`ALTER TABLE grievances ADD COLUMN ${column}`);
+  } catch (error) {
+    if (!String(error.message).toLowerCase().includes('duplicate column')) throw error;
+  }
+}
 
 const schemeCount = db.prepare('SELECT COUNT(*) AS count FROM schemes').get();
 if (schemeCount.count === 0) {
@@ -154,16 +192,19 @@ app.get('/api/grievances', (req, res) => {
   }
 });
 
-app.post('/api/grievances', (req, res) => {
+app.post('/api/grievances', upload.single('media'), (req, res) => {
   try {
-    const { name, issue } = req.body || {};
+    const { name, issue, category } = req.body || {};
     if (!name || !String(name).trim() || !issue || !String(issue).trim()) {
       return res.status(400).json({ error: 'name and issue are required' });
     }
 
-    const result = db.prepare('INSERT INTO grievances (name, issue) VALUES (?, ?)').run(
+    const mediaPath = req.file ? `/uploads/${req.file.filename}` : null;
+    const result = db.prepare('INSERT INTO grievances (name, issue, category, media_path) VALUES (?, ?, ?, ?)').run(
       String(name).trim(),
-      String(issue).trim()
+      String(issue).trim(),
+      String(category || 'other').trim() || 'other',
+      mediaPath
     );
     const created = db.prepare('SELECT * FROM grievances WHERE id = ?').get(result.lastInsertRowid);
     res.status(201).json({ data: created });
@@ -171,6 +212,13 @@ app.post('/api/grievances', (req, res) => {
     console.error('Failed to create grievance', err);
     res.status(500).json({ error: 'failed to create grievance' });
   }
+});
+
+app.use((error, req, res, next) => {
+  if (error instanceof multer.MulterError || error.message?.startsWith('Only JPEG')) {
+    return res.status(400).json({ error: error.message });
+  }
+  next(error);
 });
 
 // Create a new alert
