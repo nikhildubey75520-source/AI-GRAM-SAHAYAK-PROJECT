@@ -10,6 +10,7 @@ Gram Sahayak AI is a full-stack prototype for helping rural citizens discover go
 - Accepts grievances with optional photo or video evidence and stores them in SQLite with a `pending` status.
 - Displays submitted grievances and their attached evidence.
 - Creates, filters, and updates village alerts, with a village risk map based on alert severity.
+- Shows official scheme helplines and role-based local contacts without inventing village-specific officer details.
 - Switches visible interface labels between English, Hindi, draft Santhali, and draft Magahi.
 
 The assistant deliberately uses grounded retrieval instead of free-form generation. This keeps answers tied to known scheme records and avoids dependency on a third-party AI API during a demo. The current prototype still requires the client and server to be reachable on the same machine or local network; true offline caching and SMS/IVR fallback are roadmap items.
@@ -114,6 +115,8 @@ Add `-F "media=@path/to/evidence.jpg"` to attach a JPEG, PNG, WebP, MP4, MOV, or
 8. Close with the Jharkhand roadmap: state schemes, Santhali and Mundari support, FRA guidance, CSC deployment, and SMS/IVR fallback.
 
 Santhali and Magahi support are best-effort draft translations for demonstration only. Production deployment requires review with native speakers of each language. Santhali may use the Ol Chiki script, while the current Magahi strings use Devanagari; neither set of strings should be treated as verified translations.
+
+Scheme contact numbers are presented as public helpline references and should be rechecked against the relevant official portal before production deployment. Local assistance is intentionally described by role, such as a Panchayat Secretary or Block Development Officer, because village-level assignments vary and must come from an official directory such as JharSewa.
 
 ## Roadmap
 

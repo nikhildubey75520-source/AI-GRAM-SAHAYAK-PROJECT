@@ -141,6 +141,18 @@ function SchemeCard({ scheme }) {
             <strong>How to apply</strong>
             <p>{scheme.how_to_apply || 'Application guidance is not available yet.'}</p>
           </div>
+          {scheme.helpline && (
+            <div className="detail-row contact-row">
+              <strong>Helpline</strong>
+              <p><a href={`tel:${scheme.helpline.split('/')[0].trim()}`}>{scheme.helpline}</a></p>
+            </div>
+          )}
+          {scheme.local_contact_role && (
+            <div className="detail-row contact-row">
+              <strong>Ask locally</strong>
+              <p>{scheme.local_contact_role}</p>
+            </div>
+          )}
           {scheme.official_link && (
             <a href={scheme.official_link} target="_blank" rel="noopener noreferrer" className="official-link">
               Visit official website ↗

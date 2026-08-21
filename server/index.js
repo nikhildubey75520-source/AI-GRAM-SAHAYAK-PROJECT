@@ -69,7 +69,9 @@ db.exec(`
     eligibility TEXT,
     documents TEXT,
     how_to_apply TEXT,
-    official_link TEXT
+    official_link TEXT,
+    helpline TEXT,
+    local_contact_role TEXT
   );
   CREATE TABLE IF NOT EXISTS grievances (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -90,7 +92,7 @@ for (const column of ['category TEXT DEFAULT \'other\'', 'media_path TEXT']) {
   }
 }
 
-for (const column of ['eligibility TEXT', 'documents TEXT', 'how_to_apply TEXT', 'official_link TEXT']) {
+for (const column of ['eligibility TEXT', 'documents TEXT', 'how_to_apply TEXT', 'official_link TEXT', 'helpline TEXT', 'local_contact_role TEXT']) {
   try {
     db.exec(`ALTER TABLE schemes ADD COLUMN ${column}`);
   } catch (error) {
@@ -107,7 +109,9 @@ const schemes = [
     eligibility: 'All landholding farmer families with cultivable land, subject to exclusion criteria such as income tax payers and government employees.',
     documents: 'Aadhaar card, land ownership papers, bank account details, mobile number',
     how_to_apply: 'Register at the nearest Common Service Centre (CSC) or online at pmkisan.gov.in. A local patwari or panchayat can assist with land verification.',
-    official_link: 'https://pmkisan.gov.in'
+    official_link: 'https://pmkisan.gov.in',
+    helpline: '155261 / 1800-115-526',
+    local_contact_role: 'Village Agriculture Extension Officer or CSC operator'
   },
   {
     name: 'Ayushman Bharat (PM-JAY)',
@@ -116,7 +120,9 @@ const schemes = [
     eligibility: 'Families identified under the SECC 2011 database as economically vulnerable; check eligibility through the portal or a CSC.',
     documents: 'Aadhaar card, ration card, mobile number',
     how_to_apply: 'Check eligibility at pmjay.gov.in or call 14555. Visit a nearby empanelled hospital or CSC to get an Ayushman card.',
-    official_link: 'https://pmjay.gov.in'
+    official_link: 'https://pmjay.gov.in',
+    helpline: '14555 / 1800-111-565',
+    local_contact_role: 'Ayushman Mitra at nearest empanelled hospital or CSC'
   },
   {
     name: 'MGNREGA',
@@ -125,7 +131,9 @@ const schemes = [
     eligibility: 'Any adult member of a rural household willing to do unskilled manual work.',
     documents: 'Aadhaar card, job card issued by the Gram Panchayat, bank account',
     how_to_apply: 'Apply for a Job Card at the Gram Panchayat office. Once issued, request work in writing; the panchayat must provide work within 15 days.',
-    official_link: 'https://nrega.nic.in'
+    official_link: 'https://nrega.nic.in',
+    helpline: '1800-111-555',
+    local_contact_role: 'Gram Rozgar Sevak or Panchayat Secretary'
   },
   {
     name: 'Pradhan Mantri Awas Yojana (Gramin)',
@@ -134,7 +142,9 @@ const schemes = [
     eligibility: 'Houseless families or those living in kutcha or dilapidated houses, as identified through SECC 2011 and Awaas+ survey data.',
     documents: 'Aadhaar card, MGNREGA job card if available, bank account, land documents',
     how_to_apply: 'Contact the Gram Panchayat or Block Development Officer to check the beneficiary list, or apply through the Awaas+ mobile app.',
-    official_link: 'https://pmayg.nic.in'
+    official_link: 'https://pmayg.nic.in',
+    helpline: '1800-11-6446',
+    local_contact_role: 'Block Development Officer (BDO) or Panchayat Secretary'
   },
   {
     name: 'Pradhan Mantri Fasal Bima Yojana',
@@ -143,7 +153,9 @@ const schemes = [
     eligibility: 'All farmers growing notified crops in notified areas, including loanee and non-loanee farmers.',
     documents: 'Aadhaar card, land records, bank account, sowing certificate',
     how_to_apply: 'Apply through your bank if you have a crop loan, or through a CSC or insurance company portal before the seasonal enrollment deadline.',
-    official_link: 'https://pmfby.gov.in'
+    official_link: 'https://pmfby.gov.in',
+    helpline: '1800-180-1551',
+    local_contact_role: 'Bank branch manager or Village Agriculture Extension Officer'
   },
   {
     name: 'National Social Assistance Programme',
@@ -152,7 +164,9 @@ const schemes = [
     eligibility: 'BPL households; age 60+ for elderly pension, widows of any age, and persons with 80% or more disability.',
     documents: 'Aadhaar card, age or disability proof, BPL certificate, bank account',
     how_to_apply: 'Apply at the Gram Panchayat or Block office with the required documents; forms are also available through the Social Welfare Department.',
-    official_link: 'https://nsap.nic.in'
+    official_link: 'https://nsap.nic.in',
+    helpline: '1800-11-0001',
+    local_contact_role: 'Social Welfare Officer at Block office'
   },
   {
     name: 'Pradhan Mantri Ujjwala Yojana',
@@ -161,7 +175,9 @@ const schemes = [
     eligibility: 'Adult women from BPL households without an existing LPG connection.',
     documents: 'Aadhaar card, BPL ration card, bank account, passport-size photo',
     how_to_apply: 'Visit the nearest LPG distributor with the required documents, or apply online at pmuy.gov.in.',
-    official_link: 'https://pmuy.gov.in'
+    official_link: 'https://pmuy.gov.in',
+    helpline: '1800-266-6696',
+    local_contact_role: 'Nearest LPG gas agency distributor'
   },
   {
     name: 'Jal Jeevan Mission',
@@ -170,23 +186,25 @@ const schemes = [
     eligibility: 'All rural households without a functional tap water connection.',
     documents: 'No individual application is typically needed because implementation is village-wise; contact the Gram Panchayat for status.',
     how_to_apply: 'Check with the Gram Panchayat or Village Water and Sanitation Committee (VWSC) about implementation status in your village.',
-    official_link: 'https://jaljeevanmission.gov.in'
+    official_link: 'https://jaljeevanmission.gov.in',
+    helpline: '1916 (toll-free water helpline, where active)',
+    local_contact_role: 'Village Water and Sanitation Committee (VWSC) member'
   }
 ];
 
 const updateScheme = db.prepare(`
   UPDATE schemes
-  SET category = ?, description = ?, eligibility = ?, documents = ?, how_to_apply = ?, official_link = ?
+  SET category = ?, description = ?, eligibility = ?, documents = ?, how_to_apply = ?, official_link = ?, helpline = ?, local_contact_role = ?
   WHERE name = ?
 `);
 const insertScheme = db.prepare(`
-  INSERT INTO schemes (name, category, description, eligibility, documents, how_to_apply, official_link)
-  VALUES (?, ?, ?, ?, ?, ?, ?)
+  INSERT INTO schemes (name, category, description, eligibility, documents, how_to_apply, official_link, helpline, local_contact_role)
+  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
 `);
 for (const scheme of schemes) {
-  const result = updateScheme.run(scheme.category, scheme.description, scheme.eligibility, scheme.documents, scheme.how_to_apply, scheme.official_link, scheme.name);
+  const result = updateScheme.run(scheme.category, scheme.description, scheme.eligibility, scheme.documents, scheme.how_to_apply, scheme.official_link, scheme.helpline, scheme.local_contact_role, scheme.name);
   if (result.changes === 0) {
-    insertScheme.run(scheme.name, scheme.category, scheme.description, scheme.eligibility, scheme.documents, scheme.how_to_apply, scheme.official_link);
+    insertScheme.run(scheme.name, scheme.category, scheme.description, scheme.eligibility, scheme.documents, scheme.how_to_apply, scheme.official_link, scheme.helpline, scheme.local_contact_role);
   }
 }
 if (schemeCount.count === 0) {
@@ -267,7 +285,7 @@ app.get('/api/assistant/query', (req, res) => {
 
   const topMatch = matches[0];
   res.json({
-    answer: `Based on your query, "${topMatch.name}" may help: ${topMatch.description} To apply: ${topMatch.how_to_apply}`,
+    answer: `Based on your query, "${topMatch.name}" may help: ${topMatch.description} To apply: ${topMatch.how_to_apply} Contact: ${topMatch.helpline}. Locally, ask the ${topMatch.local_contact_role}.`,
     matches: matches.slice(0, 3).map(({ score, ...scheme }) => scheme)
   });
 });
