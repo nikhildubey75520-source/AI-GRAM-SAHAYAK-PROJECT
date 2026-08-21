@@ -7,8 +7,9 @@ Gram Sahayak AI is a full-stack prototype for helping rural citizens discover go
 - Shows backend connectivity and village information.
 - Browses eight seeded government schemes with category filtering.
 - Answers scheme questions using keyword-ranked retrieval over the local scheme database.
-- Accepts grievances and stores them in SQLite with a `pending` status.
-- Creates, filters, and updates village alerts.
+- Accepts grievances with optional photo or video evidence and stores them in SQLite with a `pending` status.
+- Displays submitted grievances and their attached evidence.
+- Creates, filters, and updates village alerts, with a village risk map based on alert severity.
 - Switches visible interface labels between English and Hindi.
 
 The assistant deliberately uses grounded retrieval instead of free-form generation. This keeps answers tied to known scheme records and avoids dependency on a third-party AI API during a demo. The current prototype still requires the client and server to be reachable on the same machine or local network; true offline caching and SMS/IVR fallback are roadmap items.
@@ -21,6 +22,7 @@ Prerequisite: Node.js 24 or newer. Node 24 provides the built-in `node:sqlite` m
 
 - React + Vite frontend
 - Node.js + Express backend
+- Multer media upload handling
 - Node's built-in `node:sqlite` module
 - SQLite database with idempotent sample data seeding
 
@@ -46,7 +48,7 @@ npm install
 npm run dev
 ```
 
-Open the Vite URL, usually `http://localhost:5173`. Set `VITE_API_URL` if the backend is hosted at another address. The app should show a connected backend, five villages, eight schemes, the assistant, grievance form, alerts, and the Hindi/English toggle.
+Open the Vite URL, usually `http://localhost:5173`. Set `VITE_API_URL` if the backend is hosted at another address. The app should show a connected backend, five villages, eight schemes, the assistant, grievance form with optional media evidence, village risk map, alerts, and the Hindi/English toggle.
 
 ### 3. Build the client
 
@@ -69,8 +71,9 @@ Before presenting, start both terminals and open the Vite page so judges see the
 1. Ask the assistant: `I am a small farmer, what support can I get?`
 2. Show the grounded PM-Kisan and crop-insurance results.
 3. Switch the interface to Hindi.
-4. Submit a water-supply grievance and show its `pending` response.
-5. Explain the Jharkhand roadmap: state schemes, tribal languages, FRA guidance, CSC deployment, and SMS/IVR fallback.
+4. Submit a water-supply grievance with a photo of a broken handpump and show the evidence preview and `pending` response.
+5. Open the risk map to show how village alert severity is surfaced spatially.
+6. Explain the Jharkhand roadmap: state schemes, tribal languages, FRA guidance, CSC deployment, and SMS/IVR fallback.
 
 ## API Highlights
 
@@ -81,18 +84,22 @@ Before presenting, start both terminals and open the Vite page so judges see the
 | `GET` | `/api/schemes` | List schemes, optionally filtered by category |
 | `GET` | `/api/assistant/query?q=farmer%20support` | Return a grounded answer and related schemes |
 | `GET` | `/api/grievances` | List submitted grievances |
-| `POST` | `/api/grievances` | Create a grievance with `name` and `issue` |
+| `POST` | `/api/grievances` | Create a multipart grievance with `name`, `issue`, `category`, and optional `media` |
+| `GET` | `/uploads/:filename` | Serve uploaded grievance evidence |
 | `GET` | `/api/alerts` | List village alerts |
 | `POST` | `/api/alerts` | Create an alert |
 | `PATCH` | `/api/alerts/:id` | Update an alert status |
 
-Example grievance request:
+Example grievance request without media:
 
 ```bash
 curl -X POST http://localhost:5000/api/grievances \
-	-H "Content-Type: application/json" \
-	-d '{"name":"Ravi Kumar","issue":"No water supply for 3 days in our area"}'
+	-F "name=Ravi Kumar" \
+	-F "issue=No water supply for 3 days in our area" \
+	-F "category=water"
 ```
+
+Add `-F "media=@path/to/evidence.jpg"` to attach a JPEG, PNG, WebP, MP4, MOV, or AVI file. Uploads are limited to 15 MB and stored locally under `server/uploads/`, which is excluded from git.
 
 ## Demo Flow
 
@@ -100,8 +107,9 @@ curl -X POST http://localhost:5000/api/grievances \
 2. Ask: `I am a small farmer, what support can I get?`
 3. Show the grounded PM-Kisan and crop-insurance results.
 4. Switch the interface to Hindi.
-5. Submit a water-supply grievance and show its `pending` status.
-6. Close with the Jharkhand roadmap: state schemes, Santhali and Mundari support, FRA guidance, CSC deployment, and SMS/IVR fallback.
+5. Submit a water-supply grievance with a photo and show its evidence preview and `pending` status.
+6. Open the risk map and point out the severity markers and village watchlist.
+7. Close with the Jharkhand roadmap: state schemes, Santhali and Mundari support, FRA guidance, CSC deployment, and SMS/IVR fallback.
 
 ## Roadmap
 
